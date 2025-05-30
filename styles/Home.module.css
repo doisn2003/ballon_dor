@@ -1,0 +1,605 @@
+.container {
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+  padding: 2rem 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.headerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.logoContainer {
+  margin-right: 1.5rem;
+  animation: float 4s ease-in-out infinite;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+.titleContainer {
+  flex: 1;
+}
+
+.title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(to right, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.subtitle {
+  color: #fff;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Wallet Section */
+.walletSection {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.walletConnected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.walletInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.walletIcon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd700, #ff9900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #000;
+}
+
+.walletAddress {
+  font-family: monospace;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.statusBadge {
+  background: rgba(46, 204, 113, 0.3);
+  border: 1px solid rgba(46, 204, 113, 0.6);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  background-color: #2ecc71;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connectButton {
+  width: 100%;
+  background: linear-gradient(135deg, #ffd700, #ff9900);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.connectButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Timer Section */
+.timerSection {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.timerDisplay {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.timerIcon {
+  font-size: 2rem;
+  color: #ffd700;
+  animation: pulse 2s infinite;
+}
+
+.timerText {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.timeDetails {
+  opacity: 0.8;
+}
+
+.timeItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Error Message */
+.errorMessage {
+  background: rgba(231, 76, 60, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(231, 76, 60, 0.6);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  color: #fff;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.errorIcon {
+  font-size: 1.5rem;
+  color: #e74c3c;
+  margin-top: 0.25rem;
+}
+
+.errorHelp {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.errorButton {
+  margin-top: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.errorButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Winner Section */
+.winnerSection {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.winnerContent {
+  position: relative;
+  z-index: 1;
+}
+
+.winnerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.trophyIcon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  animation: float 3s ease-in-out infinite;
+}
+
+.winnerTitle {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(to right, #fff, #ffd700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.winnerCard {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.winnerImageContainer {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 3px solid #ffd700;
+}
+
+.winnerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.winnerInfo {
+  flex: 1;
+}
+
+.winnerName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.winnerTeam {
+  opacity: 0.9;
+  margin: 0 0 1rem 0;
+}
+
+.winnerVotes {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffd700;
+}
+
+/* Players Section */
+.playersSection {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+}
+
+.playersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.playerCard {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.playerCard:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.playerImageContainer {
+  height: 280px;
+  position: relative;
+  overflow: hidden;
+}
+
+.playerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.playerCard:hover .playerImage {
+  transform: scale(1.1);
+}
+
+.teamBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+}
+
+.playerDetails {
+  padding: 1.5rem;
+}
+
+.playerName {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.playerStats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.voteCount {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.voteButton {
+  background: linear-gradient(135deg, #ffd700, #ff9900);
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.voteButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.voteAnimation {
+  animation: voteSuccess 1s ease;
+}
+
+.votedMessage {
+  background: rgba(46, 204, 113, 0.3);
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+  border: 1px solid rgba(46, 204, 113, 0.6);
+  padding: 1.5rem;
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: white;
+}
+
+/* Loading Spinner */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffd700;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+/* Confetti */
+.confettiContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.confettiPiece {
+  position: absolute;
+  animation: confettiFall 4s linear forwards;
+  opacity: 0.7;
+}
+
+/* Footer */
+.footer {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 2rem 1rem;
+  text-align: center;
+  color: white;
+}
+
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .logoContainer {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .walletConnected {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .winnerCard {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .playersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* CSS cho phần nút xem kết quả */
+.resultButtonContainer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.resultButton {
+  background-color: #1a2b45;
+  color: white;
+  border: 2px solid #ffd700;
+  padding: 12px 25px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.resultButton:hover {
+  background-color: #ffd700;
+  color: #1a2b45;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.resultButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.resultNote {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #aaa;
+  font-style: italic;
+}
+
+.smallSpinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #fff;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+} 
