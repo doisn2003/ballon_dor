@@ -261,11 +261,12 @@ const Home = () => {
   }, []);
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.logoContainer}>
-            <img src="/ballondor.png" alt="Ballon d'Or" className={styles.logo} />
+            <img src="/ballonBall.png" alt="Ballon d'Or" className={styles.logo} />
           </div>
           <div className={styles.titleContainer}>
             <h1 className={styles.title}>Bình chọn Quả Bóng Vàng - Ballon d'Or 2025</h1>
