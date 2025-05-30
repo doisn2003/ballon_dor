@@ -31,6 +31,7 @@ const Home = () => {
   const [winner, setWinner] = useState(null);
   const [votingTimeInfo, setVotingTimeInfo] = useState({ started: false, ended: false, timeLeft: '' });
   const [error, setError] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   // Kết nối với MetaMask
   const connectWallet = async () => {
@@ -148,6 +149,9 @@ const Home = () => {
         let imageFile = '';
         const playerName = player[0].toLowerCase().replace(/\s+/g, '_');
         
+        // In ra tên để debug
+        console.log("Tên cầu thủ:", player[0], "Tên đã xử lý:", playerName);
+        
         // Danh sách cầu thủ và file ảnh tương ứng
         if (playerName.includes('messi')) {
           imageFile = 'messi.jpg';
@@ -155,11 +159,11 @@ const Home = () => {
           imageFile = 'cristiano_ronaldo.jpg';
         } else if (playerName.includes('haaland')) {
           imageFile = 'erling_haaland.jpg';
-        } else if (playerName.includes('mbappe')) {
+        } else if (playerName.includes('mbapp')) { // Sửa để bắt được cả Mbappe và Mbappé
           imageFile = 'kylian_mbappe.jpg';
         } else if (playerName.includes('salah')) {
           imageFile = 'mohamed_salah.jpg';
-        } else if (playerName.includes('vinicius')) {
+        } else if (playerName.includes('vinicius') || playerName.includes('vinícius') || playerName.includes('junior') || playerName.includes('júnior')) {
           imageFile = 'vinicius.jpg';
         } else if (playerName.includes('lewandowski')) {
           imageFile = 'lewandowski.jpg';
@@ -170,6 +174,8 @@ const Home = () => {
         } else if (playerName.includes('bellingham')) {
           imageFile = 'jude_bellingham.jpg';
         }
+        
+        console.log("File ảnh được chọn:", imageFile);
         
         playersData.push({
           id: i,
@@ -250,6 +256,10 @@ const Home = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -305,11 +315,19 @@ const Home = () => {
               <div className={styles.timeDetails}>
                 <div className={styles.timeItem}>
                   <span>🕒</span>
-                  <span>Bắt đầu: {new Date(votingTimeInfo.startTime * 1000).toLocaleString()}</span>
+                  <span>
+                    {isMounted 
+                      ? `Bắt đầu: ${new Date(votingTimeInfo.startTime * 1000).toLocaleString()}` 
+                      : 'Đang tải...'}
+                  </span>
                 </div>
                 <div className={styles.timeItem}>
                   <span>🏁</span>
-                  <span>Kết thúc: {new Date(votingTimeInfo.endTime * 1000).toLocaleString()}</span>
+                  <span>
+                    {isMounted 
+                      ? `Kết thúc: ${new Date(votingTimeInfo.endTime * 1000).toLocaleString()}` 
+                      : 'Đang tải...'}
+                  </span>
                 </div>
               </div>
             )}
@@ -381,7 +399,10 @@ const Home = () => {
             ) : (
               <div className={styles.playersGrid}>
                 {players.map((player) => (
-                  <div key={player.id} className={styles.playerCard}>
+                  <div 
+                    key={player.id} 
+                    className={`${styles.playerCard} ${player.name.toLowerCase().includes('kane') ? styles.centerCard : ''}`}
+                  >
                     <div className={styles.playerImageContainer}>
                       <img 
                         src={player.imageFile ? `/images/players/${player.imageFile}` : '/images/player-placeholder.jpg'} 
