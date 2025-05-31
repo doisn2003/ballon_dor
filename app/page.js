@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import styles from '../styles/Home.module.css';
 
 // ABI của hợp đồngg
 const contractABI = [
@@ -30,6 +31,7 @@ const Home = () => {
   const [winner, setWinner] = useState(null);
   const [votingTimeInfo, setVotingTimeInfo] = useState({ started: false, ended: false, timeLeft: '' });
   const [error, setError] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
   // Kết nối với MetaMask
   const connectWallet = async () => {
@@ -142,11 +144,45 @@ const Home = () => {
       const playersData = [];
       for (let i = 0; i < playerCount; i++) {
         const player = await contract.getPlayer(i);
+        
+        // Xác định tên file ảnh dựa vào tên cầu thủ
+        let imageFile = '';
+        const playerName = player[0].toLowerCase().replace(/\s+/g, '_');
+        
+        // In ra tên để debug
+        console.log("Tên cầu thủ:", player[0], "Tên đã xử lý:", playerName);
+        
+        // Danh sách cầu thủ và file ảnh tương ứng
+        if (playerName.includes('messi')) {
+          imageFile = 'messi.jpg';
+        } else if (playerName.includes('ronaldo') || playerName.includes('cristiano')) {
+          imageFile = 'cristiano_ronaldo.jpg';
+        } else if (playerName.includes('haaland')) {
+          imageFile = 'erling_haaland.jpg';
+        } else if (playerName.includes('mbapp')) { // Sửa để bắt được cả Mbappe và Mbappé
+          imageFile = 'kylian_mbappe.jpg';
+        } else if (playerName.includes('salah')) {
+          imageFile = 'mohamed_salah.jpg';
+        } else if (playerName.includes('vinicius') || playerName.includes('vinícius') || playerName.includes('junior') || playerName.includes('júnior')) {
+          imageFile = 'vinicius.jpg';
+        } else if (playerName.includes('lewandowski')) {
+          imageFile = 'lewandowski.jpg';
+        } else if (playerName.includes('bruyne')) {
+          imageFile = 'kevin_de_bruyne.jpg';
+        } else if (playerName.includes('kane')) {
+          imageFile = 'harry_kane.jpg';
+        } else if (playerName.includes('bellingham')) {
+          imageFile = 'jude_bellingham.jpg';
+        }
+        
+        console.log("File ảnh được chọn:", imageFile);
+        
         playersData.push({
           id: i,
           name: player[0],
           team: player[1],
-          votes: Number(player[2])
+          votes: Number(player[2]),
+          imageFile: imageFile
         });
       }
       
@@ -234,104 +270,217 @@ const Home = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-blue-600 text-white p-6">
-          <h1 className="text-3xl font-bold">Bình chọn Quả Bóng Vàng - Ballon d'Or 2025</h1>
-          <p className="mt-2">Cầu thủ bóng đá xuất sắc nhất năm</p>
+    
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.logoContainer}>
+            <img src="/ballonBall.png" alt="Ballon d'Or" className={styles.logo} />
+          </div>
+          <div className={styles.titleContainer}>
+            <h1 className={styles.title}>Bình chọn Quả Bóng Vàng - Ballon d'Or 2025</h1>
+            <p className={styles.subtitle}>Cầu thủ bóng đá xuất sắc nhất năm</p>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.main}>
+        {/* Thông tin ví và kết nối */}
+        <div className={styles.walletSection}>
+          {account ? (
+            <div className={styles.walletConnected}>
+              <div className={styles.walletInfo}>
+                <div className={styles.walletIcon}>💼</div>
+                <div>
+                  <p>Ví đã kết nối</p>
+                  <p className={styles.walletAddress}>{account}</p>
+                </div>
+              </div>
+              <div className={styles.statusBadge}>
+                <span className={styles.statusDot}></span>
+                Đã kết nối
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={connectWallet}
+              className={styles.connectButton}
+            >
+              <span>🦊</span> Kết nối ví MetaMask
+            </button>
+          )}
         </div>
 
-        <div className="p-6">
-          {/* Thông tin ví và kết nối */}
-          <div className="mb-8">
-            {account ? (
-              <div className="flex items-center justify-between bg-green-50 p-4 rounded-lg border border-green-200">
-                <div>
-                  <p className="text-sm text-gray-600">Ví đã kết nối</p>
-                  <p className="font-mono text-sm">{account}</p>
+        {/* Thông tin thời gian */}
+        {account && (
+          <div className={styles.timerSection}>
+            <h2 className={styles.sectionTitle}>
+              <span>⏱️</span> Trạng thái cuộc bỏ phiếu
+            </h2>
+            <div className={styles.timerDisplay}>
+              <div className={styles.timerIcon}>⏳</div>
+              <div className={styles.timerText}>{votingTimeInfo.timeLeft}</div>
+            </div>
+            {votingTimeInfo.startTime && (
+              <div className={styles.timeDetails}>
+                <div className={styles.timeItem}>
+                  <span>🕒</span>
+                  <span>
+                    {isMounted 
+                      ? `Bắt đầu: ${new Date(votingTimeInfo.startTime * 1000).toLocaleString()}` 
+                      : 'Đang tải...'}
+                  </span>
                 </div>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">Đã kết nối</span>
+                <div className={styles.timeItem}>
+                  <span>🏁</span>
+                  <span>
+                    {isMounted 
+                      ? `Kết thúc: ${new Date(votingTimeInfo.endTime * 1000).toLocaleString()}` 
+                      : 'Đang tải...'}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <button
-                onClick={connectWallet}
-                className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition duration-200"
-              >
-                Kết nối ví MetaMask
-              </button>
             )}
           </div>
+        )}
 
-          {/* Thông tin thời gian */}
-          {account && (
-            <div className="mb-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">Trạng thái cuộc bỏ phiếu</h2>
-              <p className="text-gray-700">{votingTimeInfo.timeLeft}</p>
-              {votingTimeInfo.startTime && (
-                <div className="mt-2 text-sm text-gray-600">
-                  <p>Bắt đầu: {new Date(votingTimeInfo.startTime * 1000).toLocaleString()}</p>
-                  <p>Kết thúc: {new Date(votingTimeInfo.endTime * 1000).toLocaleString()}</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Thông báo lỗi */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
-              {error}
-            </div>
-          )}
-
-          {/* Kết quả người chiến thắng */}
-          {winner && votingTimeInfo.ended && (
-            <div className="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200 text-center">
-              <h2 className="text-2xl font-bold text-blue-800 mb-2">🏆 Người chiến thắng 🏆</h2>
-              <p className="text-xl font-semibold">{winner.name}</p>
-              <p className="text-gray-600">với {winner.votes} phiếu bầu</p>
-            </div>
-          )}
-
-          {/* Danh sách cầu thủ */}
-          {account && (
+        {/* Thông báo lỗi */}
+        {error && (
+          <div className={styles.errorMessage}>
+            <div className={styles.errorIcon}>⚠️</div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Danh sách cầu thủ</h2>
-              
-              {loading ? (
-                <p className="text-center text-gray-500 py-8">Đang tải dữ liệu...</p>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {players.map((player) => (
-                    <div key={player.id} className="border rounded-lg overflow-hidden hover:shadow-md transition duration-200">
-                      <div className="p-4">
-                        <h3 className="text-lg font-semibold">{player.name}</h3>
-                        <p className="text-gray-600 text-sm">{player.team}</p>
-                        <div className="flex justify-between items-center mt-4">
-                          <span className="text-sm text-gray-500">{player.votes} phiếu bầu</span>
-                          {!hasUserVoted && votingTimeInfo.started && !votingTimeInfo.ended && (
-                            <button
-                              onClick={() => voteForPlayer(player.id)}
-                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                              disabled={loading}
-                            >
-                              Bỏ phiếu
-                            </button>
-                          )}
+              <div>{error}</div>
+              <div className={styles.errorHelp}>
+                Vui lòng kiểm tra lại kết nối MetaMask và thử lại.
+              </div>
+              <button 
+                onClick={() => setError('')}
+                className={styles.errorButton}
+              >
+                <span>✖️</span> Đóng
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Kết quả người chiến thắng */}
+        {winner && votingTimeInfo.ended && (
+          <div className={styles.winnerSection}>
+            <div className={styles.winnerContent}>
+              <div className={styles.winnerHeader}>
+                <img src="/trophy.png" alt="Trophy" className={styles.trophyIcon} />
+                <h2 className={styles.winnerTitle}>Người chiến thắng</h2>
+              </div>
+              <div className={styles.winnerCard}>
+                <div className={styles.winnerImageContainer}>
+                  <img 
+                    src={winner && players[winner.id]?.imageFile ? `/images/players/${players[winner.id].imageFile}` : '/images/player-placeholder.jpg'} 
+                    alt={winner?.name} 
+                    className={styles.winnerImage} 
+                    onError={(e) => {e.target.onerror = null; e.target.src = '/images/player-placeholder.jpg'}} 
+                  />
+                </div>
+                <div className={styles.winnerInfo}>
+                  <h3 className={styles.winnerName}>{winner.name}</h3>
+                  <p className={styles.winnerTeam}>
+                    {players[winner.id]?.team || ""}
+                  </p>
+                  <div className={styles.winnerVotes}>
+                    <span>🏆</span> {winner.votes} phiếu bầu
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Danh sách cầu thủ */}
+        {account && (
+          <div className={styles.playersSection}>
+            <h2 className={styles.sectionTitle}>
+              <span>⚽</span> Danh sách cầu thủ
+            </h2>
+            
+            {loading ? (
+              <div className={styles.loadingContainer}>
+                <div className={styles.loadingSpinner}></div>
+                <p>Đang tải dữ liệu...</p>
+              </div>
+            ) : (
+              <div className={styles.playersGrid}>
+                {players.map((player) => (
+                  <div 
+                    key={player.id} 
+                    className={`${styles.playerCard} ${player.name.toLowerCase().includes('kane') ? styles.centerCard : ''}`}
+                  >
+                    <div className={styles.playerImageContainer}>
+                      <img 
+                        src={player.imageFile ? `/images/players/${player.imageFile}` : '/images/player-placeholder.jpg'} 
+                        alt={player.name}
+                        className={styles.playerImage} 
+                        onError={(e) => {e.target.onerror = null; e.target.src = '/images/player-placeholder.jpg'}}
+                      />
+                      <div className={styles.teamBadge}>{player.team}</div>
+                    </div>
+                    <div className={styles.playerDetails}>
+                      <h3 className={styles.playerName}>{player.name}</h3>
+                      <div className={styles.playerStats}>
+                        <div className={styles.voteCount}>
+                          <span>🗳️</span> {player.votes} phiếu
                         </div>
+                        {!hasUserVoted && votingTimeInfo.started && !votingTimeInfo.ended && (
+                          <button
+                            onClick={() => voteForPlayer(player.id)}
+                            className={styles.voteButton}
+                            disabled={loading}
+                          >
+                            <span>✓</span> Bỏ phiếu
+                          </button>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
+            )}
 
-              {hasUserVoted && (
-                <div className="mt-6 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 text-center">
-                  Bạn đã bỏ phiếu trong cuộc bầu chọn này. Cảm ơn đã tham gia!
-                </div>
-              )}
-            </div>
-          )}
+            {hasUserVoted && (
+              <div className={styles.votedMessage}>
+                <span>✅</span> Bạn đã bỏ phiếu trong cuộc bầu chọn này. Cảm ơn đã tham gia!
+              </div>
+            )}
+            
+            {votingTimeInfo.started && !votingTimeInfo.ended && (
+              <div className={styles.resultButtonContainer}>
+                <button 
+                  className={styles.resultButton}
+                  disabled={!votingTimeInfo.ended}
+                >
+                  {votingTimeInfo.ended ? (
+                    <>Xem kết quả</>
+                  ) : (
+                    <>
+                      <div className={styles.smallSpinner}></div>
+                      Chờ kết quả
+                    </>
+                  )}
+                </button>
+                <p className={styles.resultNote}>Kết quả sẽ được công bố sau khi cuộc bỏ phiếu kết thúc</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      
+      <div className={styles.footer}>
+        <div className={styles.footerContent}>
+          <p>© 2025 Ballon d'Or Voting dApp | Powered by Ethereum</p>
+          <p>Được phát triển với ❤️ Hardhat testnet</p>
         </div>
       </div>
     </div>

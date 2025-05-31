@@ -1,43 +1,21 @@
-// Script để deploy hợp đồng GoldenBallVoting trên mạng hardhat local
 const hre = require("hardhat");
-const fs = require("fs");
-const path = require("path");
 
 async function main() {
-  console.log("Bắt đầu deploy hợp đồng GoldenBallVoting trên mạng hardhat...");
+  console.log("Bắt đầu test deploy và giả lập bỏ phiếu cho hợp đồng GoldenBallVoting...");
 
   // Lấy thời gian hiện tại (Unix timestamp)
   const currentTimestamp = Math.floor(Date.now() / 1000);
   // Bắt đầu ngay lập tức
   const startTime = currentTimestamp;
-  // Kéo dài trong 1 giờ
-  const durationInMinutes = 60;
+  // Kéo dài trong 1 phút để dễ dàng giả lập kết thúc
+  const durationInMinutes = 1;
 
   // Deploy hợp đồng
   const GoldenBallVoting = await hre.ethers.getContractFactory("GoldenBallVoting");
   const voting = await GoldenBallVoting.deploy(startTime, durationInMinutes);
-
   await voting.waitForDeployment();
-
   const address = await voting.getAddress();
   console.log(`GoldenBallVoting đã được deploy thành công tại địa chỉ: ${address}`);
-
-  // Cập nhật địa chỉ contract trong file index.js
-  /*try {
-    const indexFilePath = path.join(__dirname, "../pages/index.js");
-    let indexFileContent = fs.readFileSync(indexFilePath, "utf8");
-    
-    // Tìm và thay thế dòng địa chỉ hợp đồng
-    indexFileContent = indexFileContent.replace(
-      /const contractAddress = ".*";/,
-      `const contractAddress = "${address}"; // Địa chỉ hợp đồng đã deploy`
-    );
-    
-    fs.writeFileSync(indexFilePath, indexFileContent);
-    console.log(`Đã cập nhật địa chỉ hợp đồng trong file index.js thành công!`);
-  } catch (error) {
-    console.error("Lỗi khi cập nhật địa chỉ hợp đồng:", error);
-  }*/
 
   // Thêm 10 cầu thủ
   const players = [
@@ -60,17 +38,62 @@ async function main() {
     console.log(`Đã thêm cầu thủ: ${player.name} từ đội ${player.team}`);
   }
 
-  console.log("Hoàn tất quá trình deploy!");
-  console.log(`Thời gian bắt đầu cuộc bỏ phiếu: ${new Date(startTime * 1000).toLocaleString()}`);
-  console.log(`Thời gian kết thúc cuộc bỏ phiếu: ${new Date((startTime + durationInMinutes * 60) * 1000).toLocaleString()}`);
-  console.log("----------------------------------------------------");
-  console.log("Phảikết nối MetaMask với mạng Hardhat (http://localhost:8545)");
+  // Giả lập các phiếu bầu
+  const voteCounts = {
+    "Lionel Messi": 6,
+    "Cristiano Ronaldo": 4,
+    "Harry Kane": 2
+  };
 
+  // Lấy danh sách các tài khoản từ Hardhat
+  const signers = await hre.ethers.getSigners();
+  let voterIndex = 1; // Bắt đầu từ 1 vì 0 là owner
+
+  // Hàm để bỏ phiếu cho một cầu thủ với số lượng phiếu nhất định
+  async function voteForPlayer(playerName, count) {
+    const playerId = players.findIndex(p => p.name === playerName);
+    if (playerId === -1) throw new Error(`Không tìm thấy cầu thủ: ${playerName}`);
+    for (let i = 0; i < count; i++) {
+      if (voterIndex >= signers.length) throw new Error("Không đủ tài khoản để bỏ phiếu");
+      const voter = signers[voterIndex];
+      await voting.connect(voter).vote(playerId);
+      voterIndex++;
+    }
+    console.log(`Đã bỏ ${count} phiếu cho ${playerName}`);
+  }
+
+  console.log("Giả lập bỏ phiếu...");
+  await voteForPlayer("Lionel Messi", voteCounts["Lionel Messi"]);
+  await voteForPlayer("Cristiano Ronaldo", voteCounts["Cristiano Ronaldo"]);
+  await voteForPlayer("Harry Kane", voteCounts["Harry Kane"]);
+
+  // Bỏ phiếu cho các cầu thủ còn lại, mỗi người 50 phiếu
+  for (const player of players) {
+    if (!voteCounts[player.name]) {
+      await voteForPlayer(player.name, 1);
+    }
+  }
+
+  // Giả lập thời gian để kết thúc cuộc bỏ phiếu
+  console.log("Kết thúc thời gian bỏ phiếu...");
+  const durationInSeconds = durationInMinutes * 60;
+  await hre.network.provider.send("evm_increaseTime", [durationInSeconds]);
+  await hre.network.provider.send("evm_mine");
+
+  // Kiểm tra người chiến thắng
+  const [winnerId, winnerName, winningVoteCount] = await voting.getWinner();
+  console.log(`Người chiến thắng: ${winnerName} với ${winningVoteCount} phiếu bầu.`);
+
+  // Công bố kết quả
+  const owner = signers[0];
+  await voting.connect(owner).announceResult();
+  console.log("Đã công bố kết quả.");
+
+  console.log("Hoàn tất quá trình test và giả lập!");
 }
 
-// Thực thi hàm main và xử lý lỗi
 main()
   .catch((error) => {
-    console.error(error);
+    console.error("Lỗi:", error);
     process.exit(1);
   });
