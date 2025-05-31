@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { useRouter } from 'next/navigation';
 import styles from '../styles/Home.module.css';
 
 // ABI của hợp đồngg
@@ -17,9 +18,10 @@ const contractABI = [
 ];
 
 // Địa chỉ hợp đồng
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
 
 const Home = () => {
+  const router = useRouter();
   // States
   const [account, setAccount] = useState('');
   const [provider, setProvider] = useState(null);
@@ -274,215 +276,16 @@ const Home = () => {
     setIsMounted(true);
   }, []);
 
+  useEffect(() => {
+    // Tự động điều hướng đến trang home
+    router.push('/pages/home');
+  }, [router]);
+
   return (
-    
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logoContainer}>
-            <img src="/ballonBall.png" alt="Ballon d'Or" className={styles.logo} />
-          </div>
-          <div className={styles.titleContainer}>
-            <h1 className={styles.title}>Bình chọn Quả Bóng Vàng - Ballon d'Or 2025</h1>
-            <p className={styles.subtitle}>Cầu thủ bóng đá xuất sắc nhất năm</p>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.main}>
-        {/* Thông tin ví và kết nối */}
-        <div className={styles.walletSection}>
-          {account ? (
-            <div className={styles.walletConnected}>
-              <div className={styles.walletInfo}>
-                <div className={styles.walletIcon}>💼</div>
-                <div>
-                  <p>Ví đã kết nối</p>
-                  <p className={styles.walletAddress}>{account}</p>
-                </div>
-              </div>
-              <div className={styles.statusBadge}>
-                <span className={styles.statusDot}></span>
-                Đã kết nối
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={connectWallet}
-              className={styles.connectButton}
-            >
-              <span>🦊</span> Kết nối ví MetaMask
-            </button>
-          )}
-        </div>
-
-        {/* Thông tin thời gian */}
-        {account && (
-          <div className={styles.timerSection}>
-            <h2 className={styles.sectionTitle}>
-              <span>⏱️</span> Trạng thái cuộc bỏ phiếu
-            </h2>
-            <div className={styles.timerDisplay}>
-              <div className={styles.timerIcon}>⏳</div>
-              <div className={styles.timerText}>{votingTimeInfo.timeLeft}</div>
-            </div>
-            {votingTimeInfo.startTime && (
-              <div className={styles.timeDetails}>
-                <div className={styles.timeItem}>
-                  <span>🕒</span>
-                  <span>
-                    {isMounted 
-                      ? `Bắt đầu: ${new Date(votingTimeInfo.startTime * 1000).toLocaleString()}` 
-                      : 'Đang tải...'}
-                  </span>
-                </div>
-                <div className={styles.timeItem}>
-                  <span>🏁</span>
-                  <span>
-                    {isMounted 
-                      ? `Kết thúc: ${new Date(votingTimeInfo.endTime * 1000).toLocaleString()}` 
-                      : 'Đang tải...'}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Thông báo lỗi */}
-        {error && (
-          <div className={styles.errorMessage}>
-            <div className={styles.errorIcon}>⚠️</div>
-            <div>
-              <div>{error}</div>
-              <div className={styles.errorHelp}>
-                Vui lòng kiểm tra lại kết nối MetaMask và thử lại.
-              </div>
-              <button 
-                onClick={() => setError('')}
-                className={styles.errorButton}
-              >
-                <span>✖️</span> Đóng
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Kết quả người chiến thắng */}
-        {winner && votingTimeInfo.ended && (
-          <div className={styles.winnerSection}>
-            <div className={styles.winnerContent}>
-              <div className={styles.winnerHeader}>
-                <img src="/trophy.png" alt="Trophy" className={styles.trophyIcon} />
-                <h2 className={styles.winnerTitle}>Người chiến thắng</h2>
-              </div>
-              <div className={styles.winnerCard}>
-                <div className={styles.winnerImageContainer}>
-                  <img 
-                    src={winner && players[winner.id]?.imageFile ? `/images/players/${players[winner.id].imageFile}` : '/images/player-placeholder.jpg'} 
-                    alt={winner?.name} 
-                    className={styles.winnerImage} 
-                    onError={(e) => {e.target.onerror = null; e.target.src = '/images/player-placeholder.jpg'}} 
-                  />
-                </div>
-                <div className={styles.winnerInfo}>
-                  <h3 className={styles.winnerName}>{winner.name}</h3>
-                  <p className={styles.winnerTeam}>
-                    {players[winner.id]?.team || ""}
-                  </p>
-                  <div className={styles.winnerVotes}>
-                    <span>🏆</span> {winner.votes} phiếu bầu
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Danh sách cầu thủ */}
-        {account && (
-          <div className={styles.playersSection}>
-            <h2 className={styles.sectionTitle}>
-              <span>⚽</span> Danh sách cầu thủ
-            </h2>
-            
-            {loading ? (
-              <div className={styles.loadingContainer}>
-                <div className={styles.loadingSpinner}></div>
-                <p>Đang tải dữ liệu...</p>
-              </div>
-            ) : (
-              <div className={styles.playersGrid}>
-                {players.map((player) => (
-                  <div 
-                    key={player.id} 
-                    className={`${styles.playerCard} ${player.name.toLowerCase().includes('kane') ? styles.centerCard : ''}`}
-                  >
-                    <div className={styles.playerImageContainer}>
-                      <img 
-                        src={player.imageFile ? `/images/players/${player.imageFile}` : '/images/player-placeholder.jpg'} 
-                        alt={player.name}
-                        className={styles.playerImage} 
-                        onError={(e) => {e.target.onerror = null; e.target.src = '/images/player-placeholder.jpg'}}
-                      />
-                      <div className={styles.teamBadge}>{player.team}</div>
-                    </div>
-                    <div className={styles.playerDetails}>
-                      <h3 className={styles.playerName}>{player.name}</h3>
-                      <div className={styles.playerStats}>
-                        <div className={styles.voteCount}>
-                          <span>🗳️</span> {player.votes} phiếu
-                        </div>
-                        {!hasUserVoted && votingTimeInfo.started && !votingTimeInfo.ended && (
-                          <button
-                            onClick={() => voteForPlayer(player.id)}
-                            className={styles.voteButton}
-                            disabled={loading}
-                          >
-                            <span>✓</span> Bỏ phiếu
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {hasUserVoted && (
-              <div className={styles.votedMessage}>
-                <span>✅</span> Bạn đã bỏ phiếu trong cuộc bầu chọn này. Cảm ơn đã tham gia!
-              </div>
-            )}
-            
-            {votingTimeInfo.started && !votingTimeInfo.ended && (
-              <div className={styles.resultButtonContainer}>
-                <button 
-                  className={styles.resultButton}
-                  disabled={!votingTimeInfo.ended}
-                >
-                  {votingTimeInfo.ended ? (
-                    <>Xem kết quả</>
-                  ) : (
-                    <>
-                      <div className={styles.smallSpinner}></div>
-                      Chờ kết quả
-                    </>
-                  )}
-                </button>
-                <p className={styles.resultNote}>Kết quả sẽ được công bố sau khi cuộc bỏ phiếu kết thúc</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      
-      <div className={styles.footer}>
-        <div className={styles.footerContent}>
-          <p>© 2025 Ballon d'Or Voting dApp | Powered by Ethereum</p>
-          <p>Được phát triển với ❤️ Hardhat testnet</p>
-        </div>
-      </div>
+      <main className={styles.main}>
+        <h1 className={styles.title}>Đang chuyển hướng...</h1>
+      </main>
     </div>
   );
 };

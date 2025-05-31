@@ -8,7 +8,7 @@ async function main() {
   // Bắt đầu ngay lập tức
   const startTime = currentTimestamp;
   // Kéo dài trong 1 phút để dễ dàng giả lập kết thúc
-  const durationInMinutes = 1;
+  const durationInMinutes = 10;
 
   // Deploy hợp đồng
   const GoldenBallVoting = await hre.ethers.getContractFactory("GoldenBallVoting");
@@ -74,22 +74,22 @@ async function main() {
     }
   }
 
-  // Giả lập thời gian để kết thúc cuộc bỏ phiếu
-  console.log("Kết thúc thời gian bỏ phiếu...");
-  const durationInSeconds = durationInMinutes * 60;
-  await hre.network.provider.send("evm_increaseTime", [durationInSeconds]);
-  await hre.network.provider.send("evm_mine");
+  // // Giả lập thời gian để kết thúc cuộc bỏ phiếu
+  // console.log("Kết thúc thời gian bỏ phiếu...");
+  // const durationInSeconds = durationInMinutes * 60;
+  // await hre.network.provider.send("evm_increaseTime", [durationInSeconds]);
+  // await hre.network.provider.send("evm_mine");
 
-  // Kiểm tra người chiến thắng
-  const [winnerId, winnerName, winningVoteCount] = await voting.getWinner();
-  console.log(`Người chiến thắng: ${winnerName} với ${winningVoteCount} phiếu bầu.`);
+  // // Kiểm tra người chiến thắng
+  // const [winnerId, winnerName, winningVoteCount] = await voting.getWinner();
+  // console.log(`Người chiến thắng: ${winnerName} với ${winningVoteCount} phiếu bầu.`);
 
-  // Công bố kết quả
-  const owner = signers[0];
-  await voting.connect(owner).announceResult();
-  console.log("Đã công bố kết quả.");
+  // // Công bố kết quả
+  // const owner = signers[0];
+  // await voting.connect(owner).announceResult();
+  // console.log("Đã công bố kết quả.");
 
-  console.log("Hoàn tất quá trình test và giả lập!");
+  // console.log("Hoàn tất quá trình test và giả lập!");
 }
 
 main()

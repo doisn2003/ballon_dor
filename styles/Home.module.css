@@ -634,3 +634,53 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Network section */
+.networkSuccess {
+  background-color: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.5);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.networkError {
+  background-color: rgba(231, 76, 60, 0.2);
+  border: 1px solid rgba(231, 76, 60, 0.5);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.switchNetworkButton {
+  background-color: rgba(46, 204, 113, 0.7);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.switchNetworkButton:hover {
+  background-color: rgba(46, 204, 113, 1);
+  transform: translateY(-2px);
+}
+
+.noPlayers {
+  text-align: center;
+  padding: 3rem 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  margin-top: 1rem;
+  color: white;
+}
