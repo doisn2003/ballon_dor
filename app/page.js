@@ -231,11 +231,25 @@ const Home = () => {
     const timer = setInterval(async () => {
       if (contract) {
         await getVotingTimeInfo(contract);
+        
+        // Nếu cuộc bỏ phiếu đã kết thúc và chưa có thông tin người chiến thắng, lấy dữ liệu
+        if (votingTimeInfo.ended && !winner) {
+          try {
+            const winnerInfo = await contract.getWinner();
+            setWinner({
+              id: Number(winnerInfo[0]),
+              name: winnerInfo[1],
+              votes: Number(winnerInfo[2])
+            });
+          } catch (error) {
+            console.log("Không thể lấy thông tin người chiến thắng:", error);
+          }
+        }
       }
     }, 1000);
-
+  
     return () => clearInterval(timer);
-  }, [contract]);
+  }, [contract, votingTimeInfo.ended, winner]);
 
   // Kết nối ví khi trang được tải
   useEffect(() => {
