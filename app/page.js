@@ -466,7 +466,7 @@ const Home = () => {
       <div className={styles.footer}>
         <div className={styles.footerContent}>
           <p>© 2025 Ballon d'Or Voting dApp | Powered by Ethereum</p>
-          <p>Được phát triển với ❤️ bởi Blockchain Enthusiasts</p>
+          <p>Được phát triển với ❤️ Hardhat testnet</p>
         </div>
       </div>
     </div>
