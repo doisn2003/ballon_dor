@@ -1,0 +1,23 @@
+#Vấn đề:
+người dùng không hề muốn bị tiết lộ phiếu bầu của mình (việc người khác xem danh sách phiếu bầu có thể khiến địa chỉ ví của người dùng bị tiết lộ, dẫn đến bị thao túng, đe dọa).
+
+#Giải pháp
+dùng kỹ thuật kết hợp Secure Sum, Blockchain và Zero-Knowledge Proofs (ZKP) trong hệ thống bỏ phiếu
+#Secure Sum là là một giao thức trong SMC, cho phép nhiều bên cùng tính tổng giá trị riêng của họ mà không tiết lộ giá trị cụ thể của từng bên. Ví dụ: 3 người A, B và C có số riêng a, b, c và họ muốn tính tổng a + b + c mà không ai biết giá trị của người khác. 
+-> ưu điểm: Không thể gian lận từng phiếu: Vì mỗi phiếu được mã hóa và chỉ tổng hợp chung, không ai (kể cả admin) có thể sửa đổi phiếu cá nhân. Kết quả toán học đảm bảo: Secure Sum dựa trên lý thuyết mật mã, đảm bảo tổng số phiếu chính xác.
+-> hạn chế: Người dùng không thể tự kiểm tra phiếu của mình đã được tính vào tổng hay chưa.
+=> Giải pháp kết hợp Secure Sum + blockchain và một hệ ZKP:
+Để tối ưu hóa giữa minh bạch và riêng tư, có thể áp dụng mô hình hybrid:
+
+1. Secure Sum để tổng hợp phiếu:
+Đảm bảo riêng tư cho từng phiếu bầu.
+2. Blockchain lưu trữ địa chỉ cá nhân của phiếu:
+Mỗi phiếu bầu được lưu lên blockchain.
+Sau khi tổng hợp, công bố địa chỉ ví của tất cả phiếu để người dùng xác minh rằng phiếu của họ đã được đưa vào hệ thống.
+3. Zero-Knowledge Proof (ZKP):
+Cho phép người dùng chứng minh phiếu của họ đã được tính vào tổng mà không tiết lộ nội dung phiếu.
+
+Ví dụ minh họa:
+Bước 1: Người dùng A bỏ phiếu cho Messi, hệ thống lưu địa chỉ ví của A vào blockchain
+Bước 2: Secure Sum tổng hợp tất cả phiếu và công bố Messi có 1,000 phiếu.
+Bước 3: Người dùng A kiểm tra phiếu của mình trên blockchain và sử dụng ZKP để chứng minh phiếu của mình đã được tính vào tổng 1,000 phiếu mà không tiết lộ nội dung.

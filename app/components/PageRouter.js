@@ -8,7 +8,8 @@ const PageRouter = () => {
   const pathname = usePathname();
   const [pages, setPages] = useState([
     { path: '/pages/home', name: 'Trang chủ' },
-    { path: '/pages/admin', name: 'Trang quản trị' }
+    { path: '/pages/admin', name: 'Trang quản trị' },
+    { path: '/pages/voted', name: 'Xác minh phiếu bầu' }
   ]);
 
   return (
