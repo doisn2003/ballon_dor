@@ -407,6 +407,24 @@
   color: #9b59b6;
 }
 
+.zkpGuide {
+  margin: 15px 0;
+  padding: 10px 15px;
+  background: rgba(52, 152, 219, 0.1);
+  border-left: 4px solid #3498db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.zkpGuide p {
+  margin: 0;
+}
+
+.zkpGuide strong {
+  color: #3498db;
+}
+
 .verifyButton {
   background: linear-gradient(135deg, #3498db, #2980b9);
   color: white;
@@ -529,6 +547,18 @@
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.yourVote {
+  display: inline-block;
+  margin-left: 5px;
+  font-family: 'Montserrat', sans-serif;
+  color: #fff;
+  background: rgba(46, 204, 113, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  animation: pulse 2s infinite;
 }
 
 /* Voters Section */

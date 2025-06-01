@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import styles from '../../../styles/Voted.module.css';
+import { SecureSum } from '../../../utils/secureSum';
+import { ZKProof } from '../../../utils/zkProof';
 
 // ABI của hợp đồng
 const contractABI = [
@@ -20,34 +22,13 @@ const contractABI = [
 ];
 
 // Địa chỉ hợp đồng
-const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+const contractAddress = "0x4ed7c70F96B99c776995fB64377f0d4aB3B0e1C1";
 
 // Hàm mã hóa địa chỉ ví cho mục đích bảo mật
 const encryptAddress = (address) => {
   if (!address) return '';
   // Giữ 6 ký tự đầu và 4 ký tự cuối, phần giữa thay bằng dấu ...
   return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-};
-
-// Giả lập hàm tạo bằng chứng Zero-Knowledge
-const generateZKProof = (address, playerId, playerName) => {
-  // Trong thực tế, đây sẽ là một hàm phức tạp sử dụng thư viện ZK như snarkjs
-  // Nhưng ở đây chúng ta sẽ giả lập kết quả
-  const randomHash = ethers.keccak256(ethers.toUtf8Bytes(`${address}-${playerId}-${Date.now()}`));
-  return {
-    proof: randomHash,
-    publicSignals: [
-      ethers.keccak256(ethers.toUtf8Bytes(playerName)),
-      ethers.keccak256(ethers.toUtf8Bytes(address))
-    ]
-  };
-};
-
-// Hàm xác minh bằng chứng Zero-Knowledge
-const verifyZKProof = (proof, publicSignals) => {
-  // Trong thực tế, đây sẽ gọi đến contract xác minh ZK
-  // Ở đây chúng ta sẽ luôn trả về true
-  return true;
 };
 
 const VotedPage = () => {
@@ -65,6 +46,8 @@ const VotedPage = () => {
   const [verificationResult, setVerificationResult] = useState(null);
   const [secureSum, setSecureSum] = useState({});
   const [networkId, setNetworkId] = useState(null);
+  const [secureVoting, setSecureVoting] = useState(null);
+  const [zkProofInstance, setZkProofInstance] = useState(null);
 
   // Kết nối với MetaMask
   const connectWallet = async () => {
@@ -75,6 +58,8 @@ const VotedPage = () => {
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
         setNetworkId(parseInt(chainId, 16).toString());
         
+        console.log("Mạng hiện tại:", parseInt(chainId, 16));
+        
         if (parseInt(chainId, 16) !== 31337) {
           // Yêu cầu người dùng chuyển sang mạng Hardhat
           try {
@@ -82,7 +67,11 @@ const VotedPage = () => {
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: '0x7A69' }], // 31337 in hex
             });
+            // Làm mới trang sau khi chuyển mạng
+            window.location.reload();
+            return;
           } catch (switchError) {
+            console.error("Lỗi chuyển mạng:", switchError);
             // Mạng chưa được thêm vào Metamask
             if (switchError.code === 4902) {
               try {
@@ -101,6 +90,9 @@ const VotedPage = () => {
                     },
                   ],
                 });
+                // Làm mới trang sau khi thêm mạng
+                window.location.reload();
+                return;
               } catch (addError) {
                 console.error("Không thể thêm mạng Hardhat", addError);
                 setError('Không thể kết nối với mạng Hardhat. Vui lòng thêm mạng thủ công.');
@@ -128,6 +120,15 @@ const VotedPage = () => {
         setContract(votingContract);
         console.log("Contract đã được khởi tạo:", votingContract.address);
 
+        // Khởi tạo SecureSum và ZKProof
+        const secureVotingInstance = new SecureSum(votingContract);
+        await secureVotingInstance.initialize();
+        setSecureVoting(secureVotingInstance);
+
+        const zkProofInstance = new ZKProof(votingContract);
+        await zkProofInstance.initialize();
+        setZkProofInstance(zkProofInstance);
+
         try {
           // Kiểm tra người dùng đã bỏ phiếu chưa
           if (accounts[0]) {
@@ -149,11 +150,11 @@ const VotedPage = () => {
           // Lấy danh sách cầu thủ
           await getPlayers(votingContract);
           
-          // Lấy danh sách người bỏ phiếu cho mỗi cầu thủ
-          await getVotersForAllPlayers(votingContract);
-          
-          // Tính tổng secure sum (giả lập)
-          calculateSecureSum();
+          // Lấy danh sách người bỏ phiếu cho mỗi cầu thủ sau khi có players
+          if (players.length > 0) {
+            await getVotersForAllPlayers(votingContract, secureVotingInstance);
+            await calculateSecureSum(votingContract, secureVotingInstance);
+          }
           
         } catch (error) {
           console.error("Lỗi khi tương tác với contract:", error);
@@ -228,24 +229,24 @@ const VotedPage = () => {
   };
 
   // Lấy danh sách người bỏ phiếu cho tất cả cầu thủ
-  const getVotersForAllPlayers = async (contract) => {
+  const getVotersForAllPlayers = async (contract, secureVotingInstance) => {
     try {
-      if (!contract) return;
+      if (!contract || !secureVotingInstance || players.length === 0) return;
       
       const votersInfo = {};
       
       for (let i = 0; i < players.length; i++) {
-        const voterCount = await contract.getVoterCountForPlayer(i);
-        const numVoters = Number(voterCount);
-        
-        // Lấy tối đa 100 địa chỉ người bỏ phiếu cho mỗi cầu thủ
-        if (numVoters > 0) {
-          const voters = await contract.getVotersForPlayer(i, 0, 100);
+        try {
+          // Sử dụng SecureSum để lấy danh sách người bỏ phiếu đã mã hóa
+          const encryptedVoters = await secureVotingInstance.getEncryptedVoterList(i);
+          const voterCount = await contract.getVoterCountForPlayer(i);
+          
           votersInfo[i] = {
-            count: numVoters,
-            addresses: voters.map(addr => encryptAddress(addr)) // Mã hóa địa chỉ
+            count: Number(voterCount),
+            addresses: encryptedVoters // Danh sách địa chỉ đã mã hóa
           };
-        } else {
+        } catch (err) {
+          console.error(`Lỗi khi lấy danh sách người bỏ phiếu cho cầu thủ ${i}:`, err);
           votersInfo[i] = { count: 0, addresses: [] };
         }
       }
@@ -256,27 +257,42 @@ const VotedPage = () => {
     }
   };
 
-  // Tính toán Secure Sum (giả lập)
-  const calculateSecureSum = () => {
-    // Trong thực tế, đây sẽ là một quá trình phức tạp sử dụng mã hóa đồng hình
-    // Ở đây chúng ta giả lập kết quả
-    
-    const secureSumResults = {};
-    
-    players.forEach(player => {
-      // Giả lập giá trị tổng secure sum
-      secureSumResults[player.id] = {
-        encryptedSum: ethers.keccak256(ethers.toUtf8Bytes(`${player.name}-${player.votes}-${Date.now()}`)),
-        publicSum: player.votes
-      };
-    });
-    
-    setSecureSum(secureSumResults);
+  // Tính toán Secure Sum sử dụng lớp SecureSum
+  const calculateSecureSum = async (contract, secureVotingInstance) => {
+    try {
+      if (!contract || !secureVotingInstance || players.length === 0) return;
+      
+      const secureSumResults = {};
+      
+      for (const player of players) {
+        try {
+          // Lấy số phiếu bầu đã mã hóa sử dụng SecureSum
+          const encryptedSum = await secureVotingInstance.getEncryptedVoteCount(player.id);
+          
+          secureSumResults[player.id] = {
+            encryptedSum: encryptedSum,
+            publicSum: player.votes,
+            salt: null // Thêm trường salt để lưu giá trị Salt từ ZKP
+          };
+        } catch (err) {
+          console.error(`Lỗi khi tính secure sum cho cầu thủ ${player.id}:`, err);
+          secureSumResults[player.id] = {
+            encryptedSum: '0',
+            publicSum: player.votes,
+            salt: null
+          };
+        }
+      }
+      
+      setSecureSum(secureSumResults);
+    } catch (error) {
+      console.error("Lỗi khi tính secure sum:", error);
+    }
   };
 
-  // Tạo bằng chứng Zero-Knowledge
+  // Tạo bằng chứng Zero-Knowledge sử dụng lớp ZKProof
   const createZKProof = async () => {
-    if (!account || userVotedPlayer === null || !players[userVotedPlayer]) {
+    if (!account || userVotedPlayer === null || !players[userVotedPlayer] || !zkProofInstance) {
       setError('Không thể tạo bằng chứng ZK: Người dùng chưa bỏ phiếu hoặc dữ liệu không đầy đủ');
       return;
     }
@@ -284,24 +300,35 @@ const VotedPage = () => {
     setLoading(true);
     
     try {
-      // Trong thực tế, đây sẽ gọi đến một API hoặc thư viện ZK để tạo bằng chứng
-      // Ở đây chúng ta giả lập kết quả
-      const playerName = players[userVotedPlayer].name;
-      const proof = generateZKProof(account, userVotedPlayer, playerName);
+      // Sử dụng lớp ZKProof để tạo bằng chứng
+      const proof = await zkProofInstance.generateProof(account, userVotedPlayer);
+      
+      console.log("Bằng chứng đã tạo:", proof);
+      console.log("ID cầu thủ đã bỏ phiếu:", userVotedPlayer);
       
       setZkProof(proof);
       setVerificationResult(null); // Reset kết quả xác minh
+      
+      // Cập nhật secureSum để hiển thị Salt
+      if (proof && proof.salt) {
+        const updatedSecureSum = { ...secureSum };
+        if (updatedSecureSum[userVotedPlayer]) {
+          updatedSecureSum[userVotedPlayer].salt = proof.salt;
+          setSecureSum(updatedSecureSum);
+          console.log("Đã cập nhật salt cho cầu thủ:", userVotedPlayer);
+        }
+      }
     } catch (error) {
       console.error("Lỗi khi tạo bằng chứng ZK:", error);
-      setError('Không thể tạo bằng chứng Zero-Knowledge. Vui lòng thử lại sau.');
+      setError('Không thể tạo bằng chứng Zero-Knowledge: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Xác minh bằng chứng Zero-Knowledge
+  // Xác minh bằng chứng Zero-Knowledge sử dụng lớp ZKProof
   const verifyZKProofAction = async () => {
-    if (!zkProof) {
+    if (!zkProof || !zkProofInstance) {
       setError('Vui lòng tạo bằng chứng ZK trước khi xác minh');
       return;
     }
@@ -309,9 +336,8 @@ const VotedPage = () => {
     setLoading(true);
     
     try {
-      // Trong thực tế, đây sẽ gọi đến contract xác minh hoặc API
-      // Ở đây chúng ta giả lập kết quả
-      const result = verifyZKProof(zkProof.proof, zkProof.publicSignals);
+      // Sử dụng lớp ZKProof để xác minh bằng chứng
+      const result = await zkProofInstance.verifyProof(zkProof, userVotedPlayer);
       
       setVerificationResult({
         success: result,
@@ -321,9 +347,21 @@ const VotedPage = () => {
       });
     } catch (error) {
       console.error("Lỗi khi xác minh bằng chứng ZK:", error);
-      setError('Không thể xác minh bằng chứng Zero-Knowledge. Vui lòng thử lại sau.');
+      setError('Không thể xác minh bằng chứng Zero-Knowledge: ' + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Kiểm tra xem địa chỉ ví có trong danh sách đã mã hóa không
+  const checkVoterInList = async (playerId) => {
+    if (!account || !secureVoting) return false;
+    
+    try {
+      return await secureVoting.isVoterInList(account, playerId);
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra địa chỉ trong danh sách:", error);
+      return false;
     }
   };
 
@@ -341,6 +379,8 @@ const VotedPage = () => {
           setAccount('');
           setContract(null);
           setPlayers([]);
+          setSecureVoting(null);
+          setZkProofInstance(null);
         }
       });
 
@@ -356,6 +396,14 @@ const VotedPage = () => {
       };
     }
   }, []);
+
+  // Cập nhật dữ liệu khi players thay đổi
+  useEffect(() => {
+    if (contract && secureVoting && players.length > 0) {
+      getVotersForAllPlayers(contract, secureVoting);
+      calculateSecureSum(contract, secureVoting);
+    }
+  }, [players, contract, secureVoting]);
 
   return (
     <div className={styles.container}>
@@ -479,13 +527,18 @@ const VotedPage = () => {
                         <div className={styles.proofData}>
                           <div className={styles.proofItem}>
                             <span className={styles.proofLabel}>Bằng chứng Hash:</span>
-                            <span className={styles.proofValue}>{zkProof.proof.substring(0, 20)}...</span>
+                            <span className={styles.proofValue}>{zkProof.hash ? zkProof.hash.substring(0, 20) : zkProof.proof.substring(0, 20)}...</span>
                           </div>
                           <div className={styles.proofItem}>
-                            <span className={styles.proofLabel}>Public Signals:</span>
-                            <span className={styles.proofValue}>{zkProof.publicSignals[0].substring(0, 15)}...</span>
+                            <span className={styles.proofLabel}>Salt:</span>
+                            <span className={styles.proofValue}>{zkProof.salt ? zkProof.salt.substring(0, 15) : '...'}</span>
                           </div>
                         </div>
+                      </div>
+                      
+                      <div className={styles.zkpGuide}>
+                        <p><strong>Hướng dẫn:</strong> Giá trị Salt của bạn sẽ xuất hiện trong bảng <strong>Secure Sum</strong> dưới đây, 
+                        tương ứng với cầu thủ bạn đã bỏ phiếu. Điều này chứng minh phiếu bầu của bạn đã được tính vào tổng.</p>
                       </div>
                       
                       <button 
@@ -545,9 +598,22 @@ const VotedPage = () => {
                   <div className={styles.tableCell}>{player.team}</div>
                   <div className={styles.tableCell}>{player.votes}</div>
                   <div className={styles.tableCell}>
-                    {secureSum[player.id] ? (
+                    {/* Hiển thị Salt từ ZKP nếu người dùng đã bỏ phiếu cho cầu thủ này */}
+                    {hasUserVoted && userVotedPlayer === player.id && zkProof && zkProof.salt ? (
+                      <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                        Salt: {zkProof.salt.substring(0, 15)}...
+                        <span className={styles.yourVote}> (Phiếu của bạn)</span>
+                      </span>
+                    ) : secureSum[player.id] && secureSum[player.id].salt ? (
+                      <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                        Salt: {secureSum[player.id].salt.substring(0, 15)}...
+                        <span className={styles.yourVote}> (Phiếu của bạn)</span>
+                      </span>
+                    ) : secureSum[player.id] ? (
                       <span className={styles.encryptedData}>
-                        {secureSum[player.id].encryptedSum.substring(0, 10)}...
+                        {typeof secureSum[player.id].encryptedSum === 'string' && secureSum[player.id].encryptedSum.length > 20
+                          ? secureSum[player.id].encryptedSum.substring(0, 10) + '...'
+                          : secureSum[player.id].encryptedSum}
                       </span>
                     ) : (
                       'Đang tải...'
@@ -600,7 +666,7 @@ const VotedPage = () => {
       <div className={styles.footer}>
         <div className={styles.footerContent}>
           <p>© 2025 Ballon d'Or Voting dApp | Powered by Ethereum</p>
-          <p>Được phát triển với ❤️ Hardhat testnet</p>
+          <p>Được phát triển với ❤️ bởi SecureVoting Team</p>
         </div>
       </div>
     </div>
