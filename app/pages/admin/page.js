@@ -17,7 +17,7 @@ const contractABI = [
 ];
 
 // Địa chỉ hợp đồng
-const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const Admin = () => {
   const [account, setAccount] = useState('');
