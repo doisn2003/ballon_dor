@@ -21,9 +21,6 @@ const contractABI = [
   "function getVoterCountForPlayer(uint8) view returns (uint256)"
 ];
 
-// Địa chỉ hợp đồng
-const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-
 // Hàm mã hóa địa chỉ ví cho mục đích bảo mật
 const encryptAddress = (address) => {
   if (!address) return '';
@@ -48,12 +45,37 @@ const VotedPage = () => {
   const [networkId, setNetworkId] = useState(null);
   const [secureVoting, setSecureVoting] = useState(null);
   const [zkProofInstance, setZkProofInstance] = useState(null);
+  const [contractAddress, setContractAddress] = useState(null);
+  const [isDeployed, setIsDeployed] = useState(false);
+
+  // Kiểm tra xem hợp đồng đã được triển khai hay chưa
+  useEffect(() => {
+    const checkDeployment = async () => {
+      try {
+        const response = await fetch('/api/contractStatus');
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Trạng thái triển khai:", data);
+          setIsDeployed(data.isDeployed);
+          if (data.isDeployed && data.address) {
+            setContractAddress(data.address);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi kiểm tra trạng thái triển khai:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkDeployment();
+  }, []);
 
   // Kết nối với MetaMask
   const connectWallet = async () => {
     try {
       setError('');
-      if (window.ethereum) {
+      if (window.ethereum && isDeployed && contractAddress) {
         // Kiểm tra xem đã kết nối với mạng Hardhat (localhost:8545) chưa
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
         setNetworkId(parseInt(chainId, 16).toString());
@@ -114,6 +136,7 @@ const VotedPage = () => {
         setProvider(provider);
         
         console.log("Đã kết nối với tài khoản:", accounts[0]);
+        console.log("Contract address:", contractAddress);
         
         // Khởi tạo contract
         const votingContract = new ethers.Contract(contractAddress, contractABI, signer);
@@ -160,6 +183,10 @@ const VotedPage = () => {
           console.error("Lỗi khi tương tác với contract:", error);
           setError('Không thể kết nối với hợp đồng. Hãy đảm bảo Hardhat đang chạy và hợp đồng đã được triển khai.');
         }
+      } else if (!isDeployed) {
+        setError('Cuộc bỏ phiếu chưa được thiết lập. Vui lòng chờ admin khởi tạo.');
+      } else if (!contractAddress) {
+        setError('Không tìm thấy địa chỉ hợp đồng. Vui lòng liên hệ admin.');
       } else {
         setError('Vui lòng cài đặt MetaMask để sử dụng ứng dụng này');
       }
@@ -425,289 +452,345 @@ const VotedPage = () => {
       </div>
 
       <div className={styles.main}>
-        {/* Network info */}
-        {networkId && (
-          <div className={networkId === "31337" ? styles.networkSuccess : styles.networkError}>
-            <span>Mạng hiện tại: {networkId === "31337" ? "Hardhat Local (31337)" : `${networkId} (Không phải Hardhat)`}</span>
-            {networkId !== "31337" && (
-              <button onClick={connectWallet} className={styles.switchNetworkButton}>
-                Chuyển sang mạng Hardhat
-              </button>
-            )}
+        {/* Hiển thị loading state */}
+        {loading && (
+          <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Đang kiểm tra thông tin cuộc bỏ phiếu...</p>
           </div>
         )}
+        
+        {/* Hiển thị thông báo khi cuộc bỏ phiếu chưa được tạo */}
+        {!loading && !isDeployed && (
+          <div className={styles.comingSoonSection}>
+            <div className={styles.comingSoonContent}>
+              <h2 className={styles.comingSoonTitle}>Chức năng xác minh phiếu bầu sắp ra mắt!</h2>
+              <p className={styles.comingSoonDescription}>
+                Trang này sẽ cho phép bạn xác minh phiếu bầu của mình đã được tính vào kết quả sau khi cuộc bỏ phiếu được thiết lập.
+              </p>
+              
+              <div className={styles.technologySection}>
+                <h3>Giải thích về công nghệ Zero-Knowledge Proof (ZKP)</h3>
+                <p>
+                  ZKP là một phương pháp mật mã cho phép một người (người chứng minh) chứng tỏ với người khác (người xác minh) 
+                  rằng họ biết một giá trị x mà không tiết lộ bất kỳ thông tin nào khác về x.
+                </p>
+                <p>
+                  Trong ứng dụng bỏ phiếu này, ZKP được sử dụng để:
+                </p>
+                <ul>
+                  <li>Cho phép bạn chứng minh mình đã bỏ phiếu</li>
+                  <li>Đảm bảo phiếu bầu của bạn đã được tính vào tổng</li>
+                  <li>Không tiết lộ bạn đã bỏ phiếu cho ai</li>
+                </ul>
+                
+                <h3>Giải thích về công nghệ Secure Sum</h3>
+                <p>
+                  Secure Sum là phương pháp cho phép nhiều bên cùng tính toán tổng của các giá trị riêng tư mà không tiết lộ 
+                  từng giá trị riêng lẻ. Trong ứng dụng bỏ phiếu, Secure Sum đảm bảo:
+                </p>
+                <ul>
+                  <li>Tổng số phiếu bầu cho mỗi cầu thủ được tính chính xác</li>
+                  <li>Không ai có thể biết người khác đã bỏ phiếu cho ai</li>
+                  <li>Kết quả cuộc bỏ phiếu công khai và minh bạch</li>
+                </ul>
+              </div>
+              
+              <p className={styles.comingSoonNote}>
+                Vui lòng quay lại sau khi cuộc bỏ phiếu đã được thiết lập bởi admin.
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Nội dung chính khi đã triển khai */}
+        {!loading && isDeployed && (
+          <>
+            {/* Network info */}
+            {networkId && (
+              <div className={networkId === "31337" ? styles.networkSuccess : styles.networkError}>
+                <span>Mạng hiện tại: {networkId === "31337" ? "Hardhat Local (31337)" : `${networkId} (Không phải Hardhat)`}</span>
+                {networkId !== "31337" && (
+                  <button onClick={connectWallet} className={styles.switchNetworkButton}>
+                    Chuyển sang mạng Hardhat
+                  </button>
+                )}
+              </div>
+            )}
 
-        {/* Thông tin ví và kết nối */}
-        <div className={styles.walletSection}>
-          {account ? (
-            <div className={styles.walletConnected}>
-              <div className={styles.walletInfo}>
-                <div className={styles.walletIcon}>💼</div>
+            {/* Thông tin ví và kết nối */}
+            <div className={styles.walletSection}>
+              {account ? (
+                <div className={styles.walletConnected}>
+                  <div className={styles.walletInfo}>
+                    <div className={styles.walletIcon}>💼</div>
+                    <div>
+                      <p>Ví đã kết nối</p>
+                      <p className={styles.walletAddress}>{account}</p>
+                    </div>
+                  </div>
+                  <div className={styles.statusBadge}>
+                    <span className={styles.statusDot}></span>
+                    Đã kết nối
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={connectWallet}
+                  className={styles.connectButton}
+                >
+                  <span>🦊</span> Kết nối ví MetaMask
+                </button>
+              )}
+            </div>
+
+            {/* Thông báo lỗi */}
+            {error && (
+              <div className={styles.errorMessage}>
+                <div className={styles.errorIcon}>⚠️</div>
                 <div>
-                  <p>Ví đã kết nối</p>
-                  <p className={styles.walletAddress}>{account}</p>
-                </div>
-              </div>
-              <div className={styles.statusBadge}>
-                <span className={styles.statusDot}></span>
-                Đã kết nối
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={connectWallet}
-              className={styles.connectButton}
-            >
-              <span>🦊</span> Kết nối ví MetaMask
-            </button>
-          )}
-        </div>
-
-        {/* Thông báo lỗi */}
-        {error && (
-          <div className={styles.errorMessage}>
-            <div className={styles.errorIcon}>⚠️</div>
-            <div>
-              <div>{error}</div>
-              <div className={styles.errorHelp}>
-                Vui lòng kiểm tra lại kết nối MetaMask và thử lại.
-              </div>
-              <button 
-                onClick={() => setError('')}
-                className={styles.errorButton}
-              >
-                <span>✖️</span> Đóng
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Thông tin phiếu bầu của người dùng */}
-        {account && (
-          <div className={styles.votedInfoSection}>
-            <h2 className={styles.sectionTitle}>
-              <span>🗳️</span> Thông tin phiếu bầu của bạn
-            </h2>
-            
-            {loading ? (
-              <div className={styles.loadingContainer}>
-                <div className={styles.loadingSpinner}></div>
-                <p>Đang tải dữ liệu...</p>
-              </div>
-            ) : hasUserVoted ? (
-              <div className={styles.votedInfoCard}>
-                <div className={styles.votedStatus}>
-                  <div className={styles.votedIcon}>✅</div>
-                  <div className={styles.votedText}>
-                    <h3>Bạn đã tham gia bỏ phiếu</h3>
-                    {userVotedPlayer !== null && players[userVotedPlayer] && (
-                      <p>Bạn đã bỏ phiếu cho <span className={styles.highlightName}>{players[userVotedPlayer].name}</span> từ đội <span className={styles.highlightTeam}>{players[userVotedPlayer].team}</span></p>
-                    )}
+                  <div>{error}</div>
+                  <div className={styles.errorHelp}>
+                    Vui lòng kiểm tra lại kết nối MetaMask và thử lại.
                   </div>
+                  <button 
+                    onClick={() => setError('')}
+                    className={styles.errorButton}
+                  >
+                    <span>✖️</span> Đóng
+                  </button>
                 </div>
-
-                {/* Zero-Knowledge Proof Section */}
-                <div className={styles.zkProofSection}>
-                  <h3>Zero-Knowledge Proof</h3>
-                  <p>
-                    Bạn có thể chứng minh phiếu bầu của mình đã được tính vào tổng mà không tiết lộ bạn đã bỏ phiếu cho ai
-                  </p>
-                  
-                  {!zkProof ? (
-                    <button 
-                      className={styles.zkButton}
-                      onClick={createZKProof}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <><div className={styles.smallSpinner}></div> Đang tạo bằng chứng...</>
-                      ) : (
-                        <>Tạo bằng chứng Zero-Knowledge</>
-                      )}
-                    </button>
-                  ) : (
-                    <div className={styles.proofContainer}>
-                      <div className={styles.proofInfo}>
-                        <p>Bằng chứng đã được tạo thành công!</p>
-                        <div className={styles.proofData}>
-                          <div className={styles.proofItem}>
-                            <span className={styles.proofLabel}>Bằng chứng Hash:</span>
-                            <span className={styles.proofValue}>{zkProof.hash ? zkProof.hash.substring(0, 20) : zkProof.proof.substring(0, 20)}...</span>
-                          </div>
-                          <div className={styles.proofItem}>
-                            <span className={styles.proofLabel}>Salt:</span>
-                            <span className={styles.proofValue}>{zkProof.salt ? zkProof.salt.substring(0, 15) : '...'}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className={styles.zkpGuide}>
-                        <p><strong>Hướng dẫn:</strong> Giá trị Salt của bạn sẽ xuất hiện trong bảng <strong>Secure Sum</strong> dưới đây, 
-                        tương ứng với cầu thủ bạn đã bỏ phiếu. Điều này chứng minh phiếu bầu của bạn đã được tính vào tổng.</p>
-                      </div>
-                      
-                      <button 
-                        className={styles.verifyButton}
-                        onClick={verifyZKProofAction}
-                        disabled={loading}
-                      >
-                        {loading ? (
-                          <><div className={styles.smallSpinner}></div> Đang xác minh...</>
-                        ) : (
-                          <>Xác minh bằng chứng</>
-                        )}
-                      </button>
-                      
-                      {verificationResult && (
-                        <div className={`${styles.verificationResult} ${verificationResult.success ? styles.success : styles.failure}`}>
-                          <div className={styles.verificationIcon}>
-                            {verificationResult.success ? '✓' : '✗'}
-                          </div>
-                          <p>{verificationResult.message}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className={styles.notVotedMessage}>
-                <div className={styles.notVotedIcon}>ℹ️</div>
-                <p>Bạn chưa tham gia bỏ phiếu. Vui lòng bỏ phiếu trước để sử dụng tính năng này.</p>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Secure Sum Section - Hiển thị tổng được mã hóa */}
-        {account && (
-          <div className={styles.secureSumSection}>
-            <h2 className={styles.sectionTitle}>
-              <span>🔐</span> Secure Sum - Tổng hợp phiếu bầu an toàn
-            </h2>
-            <p className={styles.secureSumDescription}>
-              Đây là kết quả tổng hợp phiếu bầu sử dụng phương pháp Secure Sum, đảm bảo tính riêng tư cho người bỏ phiếu. 
-              Dữ liệu phiếu bầu cá nhân được mã hóa đồng hình, chỉ hiển thị tổng số phiếu mà không tiết lộ từng lá phiếu.
-            </p>
-            
-            <div className={styles.secureSumTable}>
-              <div className={styles.tableHeader}>
-                <div className={styles.tableCell}>Cầu thủ</div>
-                <div className={styles.tableCell}>Đội</div>
-                <div className={styles.tableCell}>Tổng số phiếu</div>
-                <div className={styles.tableCell}>Bằng chứng mã hóa</div>
-              </div>
-              {players.map(player => (
-                <div key={player.id} className={styles.tableRow}>
-                  <div className={styles.tableCell}>{player.name}</div>
-                  <div className={styles.tableCell}>{player.team}</div>
-                  <div className={styles.tableCell}>{player.votes}</div>
-                  <div className={styles.tableCell}>
-                    {/* Hiển thị Salt từ ZKP nếu người dùng đã bỏ phiếu cho cầu thủ này */}
-                    {hasUserVoted && userVotedPlayer === player.id && zkProof && zkProof.salt ? (
-                      <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
-                        Salt: {zkProof.salt.substring(0, 15)}...
-                        <span className={styles.yourVote}> (Phiếu của bạn)</span>
-                      </span>
-                    ) : secureSum[player.id] && secureSum[player.id].salt ? (
-                      <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
-                        Salt: {secureSum[player.id].salt.substring(0, 15)}...
-                        <span className={styles.yourVote}> (Phiếu của bạn)</span>
-                      </span>
-                    ) : secureSum[player.id] ? (
-                      <span className={styles.encryptedData}>
-                        {typeof secureSum[player.id].encryptedSum === 'string' && secureSum[player.id].encryptedSum.length > 20
-                          ? secureSum[player.id].encryptedSum.substring(0, 10) + '...'
-                          : secureSum[player.id].encryptedSum}
-                      </span>
-                    ) : (
-                      'Đang tải...'
-                    )}
+            {/* Thông tin phiếu bầu của người dùng */}
+            {account && (
+              <div className={styles.votedInfoSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span>🗳️</span> Thông tin phiếu bầu của bạn
+                </h2>
+                
+                {loading ? (
+                  <div className={styles.loadingContainer}>
+                    <div className={styles.loadingSpinner}></div>
+                    <p>Đang tải dữ liệu...</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Phần hiển thị địa chỉ đã bỏ phiếu (đã được mã hóa) */}
-        {account && (
-          <div className={styles.votersSection}>
-            <h2 className={styles.sectionTitle}>
-              <span>👥</span> Địa chỉ đã bỏ phiếu (đã mã hóa)
-            </h2>
-            <p className={styles.votersDescription}>
-              Danh sách địa chỉ đã bỏ phiếu được hiển thị dưới dạng mã hóa để bảo vệ quyền riêng tư. 
-              Bạn có thể xác nhận địa chỉ của mình có trong danh sách nhưng không thể biết ai đã bỏ phiếu cho cầu thủ nào.
-            </p>
-            
-            <div className={styles.votersTabs}>
-              {players.map(player => {
-                // Tạo danh sách địa chỉ mẫu dựa trên số phiếu bầu của cầu thủ
-                const demoAddresses = [];
-                const voteCount = player.votes || 0;
-                
-                // Các địa chỉ ví mẫu từ Hardhat accounts (đã mã hóa)
-                const hardhatAddresses = [
-                  "0xf39F...2266", "0x7099...79C8", "0x3C44...93BC", "0x90F7...b906", 
-                  "0x15d3...6A65", "0x9965...A4dc", "0x976E...0aa9", "0x14dC...9955", 
-                  "0x2361...1E8f", "0xa0Ee...9720", "0xBcd4...4096", "0x71bE...5788",
-                  "0xFABB...694a", "0x1CBd...3C9Ec", "0xdF3e...7097", "0xcd3B...ce71",
-                  "0x2546...Ec30", "0xbDA5...197E", "0xdD2F...44C0", "0x8626...1199"
-                ];
-                
-                // Nếu có dữ liệu thực tế và không rỗng, ưu tiên dùng dữ liệu đó
-                if (votersData[player.id] && votersData[player.id].addresses && votersData[player.id].addresses.length > 0) {
-                  return (
-                    <div key={player.id} className={styles.voterTab}>
-                      <div className={styles.voterTabHeader}>
-                        <h3>{player.name}</h3>
-                        <span className={styles.voterCount}>
-                          {votersData[player.id].count} phiếu
-                        </span>
-                      </div>
-                      <div className={styles.voterAddresses}>
-                        {votersData[player.id].addresses.map((addr, index) => (
-                          <div key={index} className={styles.voterAddress}>
-                            {addr}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                } else {
-                  // Tạo dữ liệu mẫu dựa trên số phiếu bầu từ contract
-                  for (let i = 0; i < voteCount && i < 50; i++) {
-                    // Chọn một địa chỉ từ danh sách mẫu hoặc tạo địa chỉ ngẫu nhiên
-                    const addressIndex = i % hardhatAddresses.length;
-                    demoAddresses.push(hardhatAddresses[addressIndex]);
-                  }
-                  
-                  return (
-                    <div key={player.id} className={styles.voterTab}>
-                      <div className={styles.voterTabHeader}>
-                        <h3>{player.name}</h3>
-                        <span className={styles.voterCount}>
-                          {voteCount} phiếu
-                        </span>
-                      </div>
-                      <div className={styles.voterAddresses}>
-                        {demoAddresses.length > 0 ? (
-                          demoAddresses.map((addr, index) => (
-                            <div key={index} className={styles.voterAddress}>
-                              {addr}
-                            </div>
-                          ))
-                        ) : (
-                          <p>Không có địa chỉ nào.</p>
+                ) : hasUserVoted ? (
+                  <div className={styles.votedInfoCard}>
+                    <div className={styles.votedStatus}>
+                      <div className={styles.votedIcon}>✅</div>
+                      <div className={styles.votedText}>
+                        <h3>Bạn đã tham gia bỏ phiếu</h3>
+                        {userVotedPlayer !== null && players[userVotedPlayer] && (
+                          <p>Bạn đã bỏ phiếu cho <span className={styles.highlightName}>{players[userVotedPlayer].name}</span> từ đội <span className={styles.highlightTeam}>{players[userVotedPlayer].team}</span></p>
                         )}
                       </div>
                     </div>
-                  );
-                }
-              })}
-            </div>
-          </div>
+
+                    {/* Zero-Knowledge Proof Section */}
+                    <div className={styles.zkProofSection}>
+                      <h3>Zero-Knowledge Proof</h3>
+                      <p>
+                        Bạn có thể chứng minh phiếu bầu của mình đã được tính vào tổng mà không tiết lộ bạn đã bỏ phiếu cho ai
+                      </p>
+                      
+                      {!zkProof ? (
+                        <button 
+                          className={styles.zkButton}
+                          onClick={createZKProof}
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <><div className={styles.smallSpinner}></div> Đang tạo bằng chứng...</>
+                          ) : (
+                            <>Tạo bằng chứng Zero-Knowledge</>
+                          )}
+                        </button>
+                      ) : (
+                        <div className={styles.proofContainer}>
+                          <div className={styles.proofInfo}>
+                            <p>Bằng chứng đã được tạo thành công!</p>
+                            <div className={styles.proofData}>
+                              <div className={styles.proofItem}>
+                                <span className={styles.proofLabel}>Bằng chứng Hash:</span>
+                                <span className={styles.proofValue}>{zkProof.hash ? zkProof.hash.substring(0, 20) : zkProof.proof.substring(0, 20)}...</span>
+                              </div>
+                              <div className={styles.proofItem}>
+                                <span className={styles.proofLabel}>Salt:</span>
+                                <span className={styles.proofValue}>{zkProof.salt ? zkProof.salt.substring(0, 15) : '...'}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className={styles.zkpGuide}>
+                            <p><strong>Hướng dẫn:</strong> Giá trị Salt của bạn sẽ xuất hiện trong bảng <strong>Secure Sum</strong> dưới đây, 
+                            tương ứng với cầu thủ bạn đã bỏ phiếu. Điều này chứng minh phiếu bầu của bạn đã được tính vào tổng.</p>
+                          </div>
+                          
+                          <button 
+                            className={styles.verifyButton}
+                            onClick={verifyZKProofAction}
+                            disabled={loading}
+                          >
+                            {loading ? (
+                              <><div className={styles.smallSpinner}></div> Đang xác minh...</>
+                            ) : (
+                              <>Xác minh bằng chứng</>
+                            )}
+                          </button>
+                          
+                          {verificationResult && (
+                            <div className={`${styles.verificationResult} ${verificationResult.success ? styles.success : styles.failure}`}>
+                              <div className={styles.verificationIcon}>
+                                {verificationResult.success ? '✓' : '✗'}
+                              </div>
+                              <p>{verificationResult.message}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={styles.notVotedMessage}>
+                    <div className={styles.notVotedIcon}>ℹ️</div>
+                    <p>Bạn chưa tham gia bỏ phiếu. Vui lòng bỏ phiếu trước để sử dụng tính năng này.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Secure Sum Section - Hiển thị tổng được mã hóa */}
+            {account && (
+              <div className={styles.secureSumSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span>🔐</span> Secure Sum - Tổng hợp phiếu bầu an toàn
+                </h2>
+                <p className={styles.secureSumDescription}>
+                  Đây là kết quả tổng hợp phiếu bầu sử dụng phương pháp Secure Sum, đảm bảo tính riêng tư cho người bỏ phiếu. 
+                  Dữ liệu phiếu bầu cá nhân được mã hóa đồng hình, chỉ hiển thị tổng số phiếu mà không tiết lộ từng lá phiếu.
+                </p>
+                
+                <div className={styles.secureSumTable}>
+                  <div className={styles.tableHeader}>
+                    <div className={styles.tableCell}>Cầu thủ</div>
+                    <div className={styles.tableCell}>Đội</div>
+                    <div className={styles.tableCell}>Tổng số phiếu</div>
+                    <div className={styles.tableCell}>Bằng chứng mã hóa</div>
+                  </div>
+                  {players.map(player => (
+                    <div key={player.id} className={styles.tableRow}>
+                      <div className={styles.tableCell}>{player.name}</div>
+                      <div className={styles.tableCell}>{player.team}</div>
+                      <div className={styles.tableCell}>{player.votes}</div>
+                      <div className={styles.tableCell}>
+                        {/* Hiển thị Salt từ ZKP nếu người dùng đã bỏ phiếu cho cầu thủ này */}
+                        {hasUserVoted && userVotedPlayer === player.id && zkProof && zkProof.salt ? (
+                          <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                            Salt: {zkProof.salt.substring(0, 15)}...
+                            <span className={styles.yourVote}> (Phiếu của bạn)</span>
+                          </span>
+                        ) : secureSum[player.id] && secureSum[player.id].salt ? (
+                          <span className={styles.encryptedData} style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                            Salt: {secureSum[player.id].salt.substring(0, 15)}...
+                            <span className={styles.yourVote}> (Phiếu của bạn)</span>
+                          </span>
+                        ) : secureSum[player.id] ? (
+                          <span className={styles.encryptedData}>
+                            {typeof secureSum[player.id].encryptedSum === 'string' && secureSum[player.id].encryptedSum.length > 20
+                              ? secureSum[player.id].encryptedSum.substring(0, 10) + '...'
+                              : secureSum[player.id].encryptedSum}
+                          </span>
+                        ) : (
+                          'Đang tải...'
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Phần hiển thị địa chỉ đã bỏ phiếu (đã được mã hóa) */}
+            {account && (
+              <div className={styles.votersSection}>
+                <h2 className={styles.sectionTitle}>
+                  <span>👥</span> Địa chỉ đã bỏ phiếu (đã mã hóa)
+                </h2>
+                <p className={styles.votersDescription}>
+                  Danh sách địa chỉ đã bỏ phiếu được hiển thị dưới dạng mã hóa để bảo vệ quyền riêng tư. 
+                  Bạn có thể xác nhận địa chỉ của mình có trong danh sách nhưng không thể biết ai đã bỏ phiếu cho cầu thủ nào.
+                </p>
+                
+                <div className={styles.votersTabs}>
+                  {players.map(player => {
+                    // Tạo danh sách địa chỉ mẫu dựa trên số phiếu bầu của cầu thủ
+                    const demoAddresses = [];
+                    const voteCount = player.votes || 0;
+                    
+                    // Các địa chỉ ví mẫu từ Hardhat accounts (đã mã hóa)
+                    const hardhatAddresses = [
+                      "0xf39F...2266", "0x7099...79C8", "0x3C44...93BC", "0x90F7...b906", 
+                      "0x15d3...6A65", "0x9965...A4dc", "0x976E...0aa9", "0x14dC...9955", 
+                      "0x2361...1E8f", "0xa0Ee...9720", "0xBcd4...4096", "0x71bE...5788",
+                      "0xFABB...694a", "0x1CBd...3C9Ec", "0xdF3e...7097", "0xcd3B...ce71",
+                      "0x2546...Ec30", "0xbDA5...197E", "0xdD2F...44C0", "0x8626...1199"
+                    ];
+                    
+                    // Nếu có dữ liệu thực tế và không rỗng, ưu tiên dùng dữ liệu đó
+                    if (votersData[player.id] && votersData[player.id].addresses && votersData[player.id].addresses.length > 0) {
+                      return (
+                        <div key={player.id} className={styles.voterTab}>
+                          <div className={styles.voterTabHeader}>
+                            <h3>{player.name}</h3>
+                            <span className={styles.voterCount}>
+                              {votersData[player.id].count} phiếu
+                            </span>
+                          </div>
+                          <div className={styles.voterAddresses}>
+                            {votersData[player.id].addresses.map((addr, index) => (
+                              <div key={index} className={styles.voterAddress}>
+                                {addr}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      // Tạo dữ liệu mẫu dựa trên số phiếu bầu từ contract
+                      for (let i = 0; i < voteCount && i < 50; i++) {
+                        // Chọn một địa chỉ từ danh sách mẫu hoặc tạo địa chỉ ngẫu nhiên
+                        const addressIndex = i % hardhatAddresses.length;
+                        demoAddresses.push(hardhatAddresses[addressIndex]);
+                      }
+                      
+                      return (
+                        <div key={player.id} className={styles.voterTab}>
+                          <div className={styles.voterTabHeader}>
+                            <h3>{player.name}</h3>
+                            <span className={styles.voterCount}>
+                              {voteCount} phiếu
+                            </span>
+                          </div>
+                          <div className={styles.voterAddresses}>
+                            {demoAddresses.length > 0 ? (
+                              demoAddresses.map((addr, index) => (
+                                <div key={index} className={styles.voterAddress}>
+                                  {addr}
+                                </div>
+                              ))
+                            ) : (
+                              <p>Không có địa chỉ nào.</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
       

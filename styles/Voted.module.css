@@ -697,4 +697,74 @@
   .votersTabs {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Phần Coming Soon */
+.comingSoonSection {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 2rem 0;
+}
+
+.comingSoonContent {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.comingSoonTitle {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #1a73e8;
+  text-align: center;
+}
+
+.comingSoonDescription {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #333;
+}
+
+.technologySection {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e0e0e0;
+}
+
+.technologySection h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.technologySection p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.technologySection ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.technologySection li {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+.comingSoonNote {
+  background-color: #e8f0fe;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #1a73e8;
+  font-size: 0.9rem;
+  color: #333;
+  margin-top: 2rem;
+  text-align: center;
 } 
