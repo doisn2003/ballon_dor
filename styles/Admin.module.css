@@ -48,7 +48,7 @@
 
 /* MetaMask connect section */
 .metamaskConnect {
-  background-color: #f9f9f9;
+  background-color: #280d68;
   padding: 1rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
@@ -60,6 +60,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  font-size: 1.6rem;
 }
 
 .ownerBadge {
@@ -67,12 +68,14 @@
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
+  
 }
 
 .notOwner {
   color: #dc3545;
   font-weight: 500;
+  font-size: 1.6rem;
 }
 
 .connectButton {
@@ -141,6 +144,7 @@
 
 .tabContent {
   padding: 1.5rem;
+  background-color: #280d68;
 }
 
 .tabContent h2 {
@@ -191,7 +195,7 @@
 
 /* Add player form */
 .addPlayerForm {
-  background-color: #f8f9fa;
+  background-color: #061168;
   padding: 1rem;
   margin-bottom: 1.5rem;
   border-radius: 4px;
@@ -232,7 +236,7 @@
 
 /* Voting time form */
 .votingTimeForm {
-  background-color: #f8f9fa;
+  background-color: #083460;
   padding: 1rem;
   border-radius: 4px;
   border: 1px solid #e9ecef;
@@ -241,7 +245,7 @@
 .timePreview {
   margin-top: 1rem;
   padding: 0.75rem;
-  background-color: #e9ecef;
+  background-color: #0eaaa0;
   border-radius: 4px;
 }
 

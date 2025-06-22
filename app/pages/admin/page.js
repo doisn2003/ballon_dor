@@ -313,7 +313,7 @@ const Admin = () => {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Trang quản trị Ballon d'Or 2025</h1>
+        <h1 style={{color: 'white'}}>Trang quản trị Ballon d'Or 2025</h1>
         <div className={styles.userInfo}>
           <span>Xin chào, Admin</span>
           <button onClick={handleLogout} className={styles.logoutButton}>Đăng xuất</button>
@@ -396,7 +396,7 @@ const Admin = () => {
                 <h3>Danh sách cầu thủ hiện tại ({players.length})</h3>
                 {players.length > 0 ? (
                   <table className={styles.playersTable}>
-                    <thead>
+                    <thead style={{color: 'blue'}}>
                       <tr>
                         <th>ID</th>
                         <th>Tên cầu thủ</th>
