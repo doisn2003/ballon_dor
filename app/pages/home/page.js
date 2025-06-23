@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
 import styles from '../../../styles/Home.module.css';
+import PlayersInformational from '../../../public/PlayersInformational.json';
 
 // ABI của contract
 const contractABI = [
@@ -32,6 +33,31 @@ const Home = () => {
   const [networkId, setNetworkId] = useState(null);
   const [contractAddress, setContractAddress] = useState(null);
   const [isDeployed, setIsDeployed] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const modalRef = useRef();
+
+  // Hàm lấy thông tin chi tiết từ PlayersInformational.json
+  const getPlayerInfo = (name) => {
+    return PlayersInformational.find((p) => p.name.toLowerCase() === name.toLowerCase());
+  };
+
+  // Đóng modal khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (modalRef.current && !modalRef.current.contains(event.target)) {
+        setShowModal(false);
+      }
+    };
+    if (showModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showModal]);
 
   // Kiểm tra xem hợp đồng đã được triển khai hay chưa
   useEffect(() => {
@@ -598,6 +624,11 @@ const Home = () => {
                       <div 
                         key={player.id} 
                         className={`${styles.playerCard} ${player.name.toLowerCase().includes('kane') ? styles.centerCard : ''}`}
+                        onClick={() => {
+                          setSelectedPlayer(getPlayerInfo(player.name));
+                          setShowModal(true);
+                        }}
+                        style={{ cursor: 'pointer' }}
                       >
                         <div className={styles.playerImageContainer}>
                           <img 
@@ -616,7 +647,7 @@ const Home = () => {
                             </div>
                             {!hasUserVoted && votingTimeInfo.started && !votingTimeInfo.ended && (
                               <button
-                                onClick={() => voteForPlayer(player.id)}
+                                onClick={e => { e.stopPropagation(); voteForPlayer(player.id); }}
                                 className={styles.voteButton}
                                 disabled={loading}
                               >
@@ -670,6 +701,34 @@ const Home = () => {
           <p>Được phát triển với ❤️ Hardhat testnet</p>
         </div>
       </div>
+
+      {/* Modal hiển thị thông tin cầu thủ */}
+      {showModal && selectedPlayer && (
+        <div className={styles.playerModalOverlay}>
+          <div ref={modalRef} className={styles.playerModal}>
+            <button onClick={() => setShowModal(false)} className={styles.playerModalClose}>×</button>
+            <div style={{ textAlign: 'center' }}>
+              <img src={`/images/players/${selectedPlayer.name.toLowerCase().replace(/\s+/g, '_')}.jpg`} alt={selectedPlayer.name} className={styles.playerModalAvatar} onError={e => {e.target.onerror=null; e.target.src='/images/player-placeholder.jpg'}} />
+              <h2 className={styles.playerModalName}>{selectedPlayer.name}</h2>
+              <div className={styles.playerModalTeam}>{selectedPlayer.team} - {selectedPlayer.position}</div>
+              <div className={styles.playerModalBio}>{selectedPlayer.biography}</div>
+              <div className={styles.playerModalAchievements}>
+                <b>Thành tích:</b> {selectedPlayer.achievements}
+              </div>
+              <div className={styles.playerModalStats}>
+                <div><b>Trận:</b> {selectedPlayer.matches}</div>
+                <div><b>Bàn:</b> {selectedPlayer.goals}</div>
+                <div><b>Kiến tạo:</b> {selectedPlayer.assists}</div>
+              </div>
+              <div className={styles.playerModalStats2}>
+                <div><b>Phòng ngự:</b> {selectedPlayer.defensive_actions}</div>
+                <div><b>Thu hồi bóng:</b> {selectedPlayer.ball_recoveries}</div>
+                <div><b>Km/trận:</b> {selectedPlayer.average_distance}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
