@@ -1,0 +1,382 @@
+/* Trang quản trị admin */
+.container {
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #1a1a1a;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userInfo span {
+  margin-right: 1rem;
+  font-weight: 500;
+}
+
+.logoutButton {
+  background-color: #f2f2f2;
+  border: 1px solid #d9d9d9;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #e6e6e6;
+}
+
+/* MetaMask connect section */
+.metamaskConnect {
+  background-color: #280d68;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.accountInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.6rem;
+}
+
+.ownerBadge {
+  background-color: #28a745;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  
+}
+
+.notOwner {
+  color: #dc3545;
+  font-weight: 500;
+  font-size: 1.6rem;
+}
+
+.connectButton {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.connectButton:hover {
+  background-color: #0b5ed7;
+}
+
+.connectButton:disabled {
+  background-color: #8bb5f9;
+  cursor: not-allowed;
+}
+
+/* Error message */
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  margin: 1rem 0;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+}
+
+/* Admin panel */
+.adminPanel {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabButton {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  padding: 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tabButton:hover {
+  background-color: #e0e0e0;
+}
+
+.activeTab {
+  background-color: white;
+  font-weight: bold;
+  border-bottom: 2px solid #0d6efd;
+}
+
+.tabContent {
+  padding: 1.5rem;
+  background-color: #280d68;
+}
+
+.tabContent h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+/* Form elements */
+.formGroup {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.formGroup input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.formGroup button {
+  padding: 0.5rem 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.formGroup button:hover {
+  background-color: #218838;
+}
+
+.formGroup button:disabled {
+  background-color: #86e29b;
+  cursor: not-allowed;
+}
+
+/* Add player form */
+.addPlayerForm {
+  background-color: #061168;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.addPlayerForm h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+/* Players list */
+.playersList {
+  margin-top: 1rem;
+}
+
+.playersList h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.playersTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.playersTable th, .playersTable td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.playersTable th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+}
+
+/* Voting time form */
+.votingTimeForm {
+  background-color: #083460;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.timePreview {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #0eaaa0;
+  border-radius: 4px;
+}
+
+/* Deploy section */
+.deploySection {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.deployNote {
+  margin-bottom: 1rem;
+}
+
+.deployInfo {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.deployInfo li {
+  margin-bottom: 0.5rem;
+}
+
+.deployButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+}
+
+.deployButton:hover {
+  background-color: #c82333;
+}
+
+.deployButton:disabled {
+  background-color: #e4606d;
+  cursor: not-allowed;
+}
+
+.deployMessage {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.deployMessage.success {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+}
+
+.deployMessage.error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+}
+
+.deployedInfo {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.successMessage {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* Login page */
+.loginContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.loginBox {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+  width: 400px;
+}
+
+.loginBox h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.inputGroup {
+  margin-bottom: 1rem;
+}
+
+.inputGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.loginButton:hover {
+  background-color: #0b5ed7;
+} 

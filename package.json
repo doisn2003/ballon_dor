@@ -9,9 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "circomlibjs": "^0.1.7",
     "next": "15.3.0",
+    "paillier-bigint": "^3.4.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "snarkjs": "^0.7.5"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
