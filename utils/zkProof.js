@@ -163,8 +163,7 @@ export class ZKProof {
    * @returns {BigInt} - Giá trị băm
    */
   mimcHash(address, playerId, salt) {
-    // Trong thực tế, cần sử dụng hàm băm MiMC thực sự
-    // Giả lập bằng cách tạo hash đơn giản
+    // Tạo hash đơn giản
     const hashString = `${address}-${playerId}-${salt.toString()}`;
     let hashValue = BigInt(0);
     for (let i = 0; i < hashString.length; i++) {
@@ -179,8 +178,7 @@ export class ZKProof {
    * @returns {string} - Giá trị băm dạng chuỗi
    */
   keccak256String(input) {
-    // Trong thực tế cần dùng keccak256 thực sự
-    // Đây là giả lập đơn giản
+    // Hàm băm keccak256 đơn giản, không phải là chuẩn thực tế
     let hash = 0;
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);

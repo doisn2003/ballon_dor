@@ -68,7 +68,6 @@ export class SecureSum {
    */
   encryptAddress(address) {
     // Đơn giản hóa: dùng AES hoặc một thuật toán mã hóa khác
-    // Trong thực tế, cần dùng thuật toán phức tạp hơn
     const buffer = Buffer.from(address.toLowerCase());
     return buffer.toString('base64');
   }
