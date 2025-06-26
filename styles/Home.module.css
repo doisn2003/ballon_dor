@@ -771,3 +771,98 @@
   background-color: white;
   border-radius: 8px;
 }
+
+/* Modal chi tiết cầu thủ */
+.playerModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s;
+}
+.playerModal {
+  background: #fff;
+  color: #222;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90vw;
+  padding: 32px 20px 24px 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  position: relative;
+  animation: fadeIn 0.3s;
+  transition: box-shadow 0.2s;
+}
+.playerModalClose {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s;
+}
+.playerModalClose:hover {
+  color: #e53935;
+}
+.playerModalAvatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 16px;
+  border: 4px solid #ffd700;
+  box-shadow: 0 2px 12px #ffd70055;
+}
+.playerModalName {
+  margin: 8px 0 4px;
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+.playerModalTeam {
+  color: #008793;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.playerModalBio {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.playerModalAchievements {
+  background: #f7f7f7;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.playerModalStats,
+.playerModalStats2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  font-size: 14px;
+}
+.playerModalStats2 {
+  margin-top: 8px;
+}
+@media (max-width: 500px) {
+  .playerModal {
+    padding: 18px 4vw 16px 4vw;
+    max-width: 98vw;
+  }
+  .playerModalAvatar {
+    width: 90px;
+    height: 90px;
+  }
+  .playerModalName {
+    font-size: 1.1rem;
+  }
+}

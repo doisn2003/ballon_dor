@@ -382,6 +382,12 @@ const Admin = () => {
                       value={newPlayer.team}
                       onChange={(e) => setNewPlayer({...newPlayer, team: e.target.value})}
                     />
+                    <input
+                      type="text"
+                      placeholder="Thông tin khác"
+                      value={newPlayer.info || ''}
+                      onChange={(e) => setNewPlayer({...newPlayer, name: e.target.value})}
+                    />
                     <button 
                       onClick={handleAddPlayer}
                       disabled={loading || !newPlayer.name || !newPlayer.team}
